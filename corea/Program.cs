@@ -12,9 +12,15 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddControllers();
 
-builder.Services.AddSingleton<IGameService, GameService>();
-builder.Services.AddScoped<IGameService, GameService>();
+//builder.Services.AddSingleton<IGameService, GameService>();
+//builder.Services.AddScoped<IGameService, GameService>();
 //builder.Services.AddTransient<IGameService, GameService>();
+
+
+builder.Services.AddOptions();
+
+builder.Services.Configure<JwtSetttings>(builder.Configuration.GetSection("JwtSettings"));
+
 
 builder.Services.AddScoped<IClassB, ClassB>();
 

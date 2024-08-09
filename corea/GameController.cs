@@ -1,4 +1,5 @@
 using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -7,12 +8,15 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.IdentityModel.Tokens;
-
-
+using Microsoft.Extensions.Options;
 [Route("/api/v1/[Controller]")]
-[Authorize]
+// [Authorize]
+// [ServiceFilter(typeof(AuthorizeFilter))]
+// [ServiceFilter(typeof(ExceptionFilter))]
 public class GameController : Controller
 {
+
+
 
     // http verbs - get, post, patch/put , delete 
     // get  -->  "api/game/1" ,, "api/game?id=1"
@@ -25,21 +29,42 @@ public class GameController : Controller
 
     // "/api/v1/game"
 
+
+
+
     private readonly IGameService _gameService;
     private readonly IServiceProvider serviceProvider;
+    private readonly IOptions<JwtSetttings> options;
 
-    public GameController(IGameService gameService, IServiceProvider serviceProvider)
+    public GameController(IGameService gameService, IServiceProvider serviceProvider, IOptions<JwtSetttings> options)
     {
         _gameService = gameService;
         this.serviceProvider = serviceProvider;
+        this.options = options;
     }
 
     [HttpGet]
-    [AllowAnonymous]
-    public Task<string> Get()
+    // [ServiceFilter(typeof(ActionFilter))]
+
+    public async Task<string> Get()
     {
-        return Task.FromResult(GenerateToken());
+        // 1000 
+        // var game = await _gameService.Get();
+
+        // send mail user 
+
+        // _ = SendMail(); // 1001
+
+        return await Task.FromResult(GenerateToken());
     }
+
+
+    private Task SendMail()
+    {
+        //  error
+        return Task.CompletedTask;
+    }
+
 
     // "/api/v1/game"
     [HttpPost]
@@ -49,10 +74,14 @@ public class GameController : Controller
     }
 
 
-
     public string GenerateToken()
     {
-        var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("fc8Y9SbrcEJODrGIfSDlsRalHU0UzYoU"));
+
+        var secretKey = options.Value.SecretKey;
+        var expirey = options.Value.Expirey;
+
+
+        var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey!));
         var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
 
         var claims = new[]
@@ -63,7 +92,7 @@ public class GameController : Controller
 
         var token = new JwtSecurityToken(
             claims: claims,
-            expires: DateTime.Now.AddMinutes(30),
+            expires: DateTime.Now.AddMinutes(expirey),
             signingCredentials: credentials
         );
 
@@ -102,6 +131,8 @@ public class GameController : Controller
 
 public class RequestDto
 {
+
+    [Required(ErrorMessage = "id is required")]
     public int Id { get; set; }
 }
 
