@@ -1,6 +1,8 @@
 using System.Text;
+using corea.DapperDbContext;
 using corea.DependencyInj;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -12,15 +14,33 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddControllers();
 
+
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+{
+    options.UseSqlServer(builder.Configuration.GetConnectionString("Default"));
+});
+
 //builder.Services.AddSingleton<IGameService, GameService>();
-//builder.Services.AddScoped<IGameService, GameService>();
+builder.Services.AddScoped<IGameService, GameService>();
 //builder.Services.AddTransient<IGameService, GameService>();
+
+builder.Services.AddSingleton<IDapperContext, DapperContext>();
+
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+
+builder.Services.AddMemoryCache();
+
+builder.Services.AddDistributedSqlServerCache(options =>
+{
+    options.ConnectionString = builder.Configuration.GetConnectionString("Default");
+    options.SchemaName = "dbo";
+    options.TableName = "TestCache";
+});
 
 
 builder.Services.AddOptions();
 
 builder.Services.Configure<JwtSetttings>(builder.Configuration.GetSection("JwtSettings"));
-
 
 builder.Services.AddScoped<IClassB, ClassB>();
 
@@ -55,7 +75,14 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-
+// O - object from  c# class R  -->> relational (database table )  M---> mapping  
+/// relational -->> database 
+/// ADO.net --> mapping is manual --> 
+/// Dapper --> micro-ORM --> automatic 
+/// EF --> ORM --> automatic --> Code First --> 
+/// 2, database first --> 
+/// 3. Model first --> 
+/// 
 
 
 app.UseRouting();

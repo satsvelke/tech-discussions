@@ -21,3 +21,8 @@ Description: Visual Studio .sln file explorer for Visual Studio Code
 Version: 0.8.6
 Publisher: Fernando Escolar
 VS Marketplace Link: https://marketplace.visualstudio.com/items?itemName=fernandoescolar.vscode-solution-explorer
+
+Server side caching
+
+1. memory cache -- holding a data to memory
+2. distibuted cache -- hold data to database / or you can use redis

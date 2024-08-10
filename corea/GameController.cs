@@ -9,6 +9,10 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.Extensions.Options;
+using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Caching.Distributed;
+using Newtonsoft.Json;
+using corea;
 [Route("/api/v1/[Controller]")]
 // [Authorize]
 // [ServiceFilter(typeof(AuthorizeFilter))]
@@ -36,26 +40,71 @@ public class GameController : Controller
     private readonly IServiceProvider serviceProvider;
     private readonly IOptions<JwtSetttings> options;
 
-    public GameController(IGameService gameService, IServiceProvider serviceProvider, IOptions<JwtSetttings> options)
+    private readonly IUserRepository userRepository;
+
+    private readonly IMemoryCache memoryCache;
+    private readonly IDistributedCache distributedCache;
+
+
+    public GameController(IGameService gameService, IServiceProvider serviceProvider, IOptions<JwtSetttings> options, IUserRepository userRepository, IMemoryCache memoryCache, IDistributedCache distributedCache)
     {
         _gameService = gameService;
         this.serviceProvider = serviceProvider;
         this.options = options;
+        this.userRepository = userRepository;
+        this.memoryCache = memoryCache;
+        this.distributedCache = distributedCache;
     }
 
     [HttpGet]
     // [ServiceFilter(typeof(ActionFilter))]
 
-    public async Task<string> Get()
+    public async Task<IActionResult> Get(CancellationToken cancellationToken)
     {
+
+
+
+
+        // var i = 0;
+
+        // dynamic r;
+        // r = 0;
+
         // 1000 
         // var game = await _gameService.Get();
 
         // send mail user 
 
         // _ = SendMail(); // 1001
+        // ArgumentNullException.ThrowIfNull(requestDto);
+        // string? p = requestDto.Id ?? default(string);
 
-        return await Task.FromResult(GenerateToken());
+        // var cachedUsers = memoryCache.Get("users");
+
+        // if (cachedUsers is null)
+        // {
+        //     var users = await userRepository.Get(cancellationToken);
+        //     memoryCache.Set("users", users);
+
+        //     return Ok(users);
+        // }
+
+        var distributedCacheData = distributedCache.GetString("users");
+
+        if (string.IsNullOrWhiteSpace(distributedCacheData))
+        {
+            var users = await userRepository.Get(cancellationToken);
+
+            distributedCache.SetString("users", JsonConvert.SerializeObject(users), new DistributedCacheEntryOptions()
+            {
+                SlidingExpiration = TimeSpan.FromMinutes(10)
+            });
+
+            return Ok(users);
+
+        }
+
+        return Ok(JsonConvert.DeserializeObject<IList<User>>(distributedCacheData));
     }
 
 
@@ -68,10 +117,15 @@ public class GameController : Controller
 
     // "/api/v1/game"
     [HttpPost]
-    public Task<bool> CreateGame(RequestDto requestDto)
-    {
-        return Task.FromResult(true);
-    }
+    public async Task<bool> Createuser([FromBody] UserDto userDto, CancellationToken cancellationToken)
+    => await userRepository.Add(new corea.User() { FirstName = userDto.FirstName, LastName = userDto.LastName }, cancellationToken);
+
+
+    // {
+    //     var isAdded = await userRepository.Add(new corea.User() { FirstName = userDto.FirstName, LastName = userDto.LastName }, cancellationToken);
+
+    //     return isAdded;
+    // }
 
 
     public string GenerateToken()
@@ -133,7 +187,18 @@ public class RequestDto
 {
 
     [Required(ErrorMessage = "id is required")]
-    public int Id { get; set; }
+    public string? Id { get; set; }
+}
+
+
+public class UserDto
+{
+
+    [Required(ErrorMessage = "FirstName is required")]
+    public string? FirstName { get; set; }
+
+    [Required(ErrorMessage = "LastName is required")]
+    public string? LastName { get; set; }
 }
 
 public interface IGameService
