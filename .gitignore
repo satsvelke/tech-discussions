@@ -1,0 +1,61 @@
+# .NET Core specific
+project.lock.json
+project.fragment.lock.json
+artifacts/
+bin/
+obj/
+*.user
+*.vspscc
+*.vssscc
+
+# Build results
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+bld/
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Dd]ebugPublic/
+
+# Visual Studio related
+.vscode/
+.vs/
+.vscode/settings.json
+.vscode/tasks.json
+.vscode/launch.json
+.vscode/*.suo
+.vscode/*.user
+.vscode/.vspscc
+.vscode/.vscode
+.vscode/*.dbmdl
+.vscode/*.opendb
+.vscode/.pidb
+.vscode/.suo
+.vscode/*.sln.docstates
+.vscode/.userprefs
+
+# Rider related
+.idea/
+*.sln.iml
+
+# ReSharper related
+_ReSharper*/
+*.DotSettings.user
+
+# Mac related
+.DS_Store
+
+# Windows specific
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+*.lnk
+
+# Exclude all files from the build and publish output
+!**/bin/
+!**/obj/
