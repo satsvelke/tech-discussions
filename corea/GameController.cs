@@ -120,14 +120,6 @@ public class GameController : Controller
     public async Task<bool> Createuser([FromBody] UserDto userDto, CancellationToken cancellationToken)
     => await userRepository.Add(new corea.User() { FirstName = userDto.FirstName, LastName = userDto.LastName }, cancellationToken);
 
-
-    // {
-    //     var isAdded = await userRepository.Add(new corea.User() { FirstName = userDto.FirstName, LastName = userDto.LastName }, cancellationToken);
-
-    //     return isAdded;
-    // }
-
-
     public string GenerateToken()
     {
 
@@ -164,6 +156,7 @@ public class GameController : Controller
     [HttpDelete]
     public Task<bool> DeleteGame()
     {
+
         return Task.FromResult(true);
     }
 

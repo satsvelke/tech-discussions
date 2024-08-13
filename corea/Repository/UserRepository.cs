@@ -36,7 +36,18 @@ public class UserRepository : IUserRepository
     }
 }
 
+public class UserRepository2 : IUserRepository
+{
+    public Task<bool> Add(User user, CancellationToken cancellationToken)
+    {
+        throw new NotImplementedException();
+    }
 
+    public Task<IList<User>> Get(CancellationToken cancellationToken)
+    {
+        throw new NotImplementedException();
+    }
+}
 public interface IUserRepository
 {
     Task<bool> Add(User user, CancellationToken cancellationToken);
